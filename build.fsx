@@ -11,6 +11,16 @@ open Fake.Core.TargetOperators
 open Fake.IO
 open Fake.IO.FileSystemOperators
 open Fake.JavaScript
+open Fake.Core
+open Fake.Core.TargetOperators
+open Fake.IO
+open Fake.IO.FileSystemOperators
+open Fake.DotNet
+open Fake.JavaScript
+
+open System
+open System.IO
+open Newtonsoft.Json.Linq
 open ``Build-generic``
 
 // The buildserver passes in `BITBUCKET_BUILD_NUMBER` as an integer to version the results
@@ -99,7 +109,24 @@ Target.create "Site_Build" (fun _ ->
   Shell.copyFile dist (source @@ "init.sh")
 )
 
-Target.create "Test_Solution" (fun _ -> test "OrganisationRegistry")
+let testWithDotNetLocal path =
+  let setMsBuildParams (msbuild: MSBuild.CliArguments) =
+    { msbuild with Properties = List.empty |> addRuntimeFrameworkVersion }
+
+  DotNet.test (fun p ->
+  { p with
+      Common = setCommonOptions p.Common
+      Configuration = DotNet.Release
+      NoBuild = true
+      NoRestore = true
+      Logger = Some "console;noprogress=true;verbosity=detailed"
+      MSBuildParams = setMsBuildParams p.MSBuildParams
+  }) path
+
+let testSolutionLocal sln =
+  testWithDotNetLocal (sprintf "%s.sln" sln)
+
+Target.create "Test_Solution" (fun _ -> testSolutionLocal "OrganisationRegistry")
 
 Target.create "Publish_Solution" (fun _ ->
   [
