@@ -123,8 +123,14 @@ let testWithDotNetLocal path =
       MSBuildParams = setMsBuildParams p.MSBuildParams
   }) path
 
-let testSolutionLocal sln =
-  testWithDotNetLocal (sprintf "%s.sln" sln)
+let testSolutionLocal project =
+  [
+    "OrganisationRegistry.SqlServer.IntegrationTests"
+    "OrganisationRegistry.ElasticSearch.Tests"
+    "OrganisationRegistry.VlaanderenBeNotifier.UnitTests"
+    "OrganisationRegistry.KboMutations.UnitTests"
+    "OrganisationRegistry.UnitTests"
+  ] |> List.iter (fun x -> testWithDotNet ("test" @@ x @@ (sprintf "%s.csproj" x)))
 
 Target.create "Test_Solution" (fun _ -> testSolutionLocal "OrganisationRegistry")
 
