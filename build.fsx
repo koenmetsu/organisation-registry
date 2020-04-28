@@ -195,8 +195,8 @@ Target.create "Push" ignore
   ==> "Build"
 
 "Build"
-  ==> "Site_Build"
   ==> "Test_Solution"
+  ==> "Site_Build"
   ==> "Test"
 
 "Test"
